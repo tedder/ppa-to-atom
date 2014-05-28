@@ -5,6 +5,7 @@ import requests
 from lxml import html
 import jinja2
 import boto
+import os
 
 URL = 'https://launchpad.net/~rquillo/+archive/ansible/+packages'
 
