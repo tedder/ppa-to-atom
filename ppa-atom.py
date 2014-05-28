@@ -28,14 +28,13 @@ for row in tree.xpath("//*[@id='packages_list']/*//tr[contains(@class,'archive_p
 
 
 # idea stolen from codeape on stackoverflow: http://stackoverflow.com/a/2101186/659298
-output_atom = jinja2.Environment(loader=jinja2.FileSystemLoader(".")).get_template("atomtemplate.xml.j2").render(data)
+curr_dir = os.path.dirname(os.path.realpath(__file__))
+output_atom = jinja2.Environment(loader=jinja2.FileSystemLoader(curr_dir)).get_template("atomtemplate.xml.j2").render(data)
 
 s3 = boto.connect_s3()
 s3key = s3.get_bucket('tedder').new_key('rss/ppa/rquillo.atom')
 s3key.set_metadata('Content-Type', 'application/atom+xml')
 s3key.set_contents_from_string(output_atom, replace=True, reduced_redundancy=True, headers={'Cache-Control':'public, max-age=3600'}, policy="public-read")
-
-print "output at: http://tedder.me/rss/ppa/rquillo.atom"
 
 #p = HTMLParser()
 #p.feed(packages.text)
