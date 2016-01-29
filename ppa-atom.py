@@ -6,6 +6,7 @@ from lxml import html
 import jinja2
 import boto
 import os
+import hashlib
 
 URL = 'https://launchpad.net/~rquillo/+archive/ansible/+packages'
 
@@ -21,12 +22,13 @@ for row in tree.xpath("//*[@id='packages_list']/*//tr[contains(@class,'archive_p
   rowstrs = [x.strip() for x in row.xpath("td//text()") if x.strip()]
   if not rowstrs:
     continue
-  data['items'].append( (
-    rowstrs[0][0],
-    URL,
-    ' '.join( (rowstrs) )
-  ))
-
+  content = ' '.join((rowstrs))
+  data['items'].append( {
+    'title': rowstrs[0][0],
+    'link': URL,
+    'content': content,
+    'id': hashlib.sha256(content).hexdigest()
+  })
 
 # idea stolen from codeape on stackoverflow: http://stackoverflow.com/a/2101186/659298
 curr_dir = os.path.dirname(os.path.realpath(__file__))

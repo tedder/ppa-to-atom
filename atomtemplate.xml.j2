@@ -4,9 +4,10 @@
     <title>{{title}}</title>
     {%for item in items %}
     <entry>
-        <title>{{item[0]}}</title>
-        <link href="{{item[1]}}"/>
-        <content type="html">{{item[2]}}</content>
+        <title>{{item.title}}</title>
+        <link href="{{item.link}}"/>
+        <content type="html">{{item.content}}</content>
+        <id>{{item.id}}</id>
     </entry>
     {%endfor%}
 </feed>
