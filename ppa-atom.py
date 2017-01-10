@@ -1,10 +1,11 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 #from HTMLParser import HTMLParser
 import requests
 from lxml import html
 import jinja2
-import boto
+import boto3
+import six
 import os
 import hashlib
 
@@ -22,7 +23,7 @@ for row in tree.xpath("//*[@id='packages_list']/*//tr[contains(@class,'archive_p
   rowstrs = [x.strip() for x in row.xpath("td//text()") if x.strip()]
   if not rowstrs:
     continue
-  content = ' '.join((rowstrs))
+  content = ' '.join((rowstrs)).encode('utf-8')
   data['items'].append( {
     'title': rowstrs[0][0],
     'link': URL,
@@ -32,12 +33,15 @@ for row in tree.xpath("//*[@id='packages_list']/*//tr[contains(@class,'archive_p
 
 # idea stolen from codeape on stackoverflow: http://stackoverflow.com/a/2101186/659298
 curr_dir = os.path.dirname(os.path.realpath(__file__))
-output_atom = jinja2.Environment(loader=jinja2.FileSystemLoader(curr_dir)).get_template("atomtemplate.xml.j2").render(data)
+output_atom = six.BytesIO(jinja2.Environment(loader=jinja2.FileSystemLoader(curr_dir)).get_template("atomtemplate.xml.j2").render(data).encode('utf-8'))
 
-s3 = boto.connect_s3()
-s3key = s3.get_bucket('tedder').new_key('rss/ppa/rquillo.atom')
-s3key.set_metadata('Content-Type', 'application/atom+xml')
-s3key.set_contents_from_string(output_atom, replace=True, reduced_redundancy=True, headers={'Cache-Control':'public, max-age=3600'}, policy="public-read")
+s3 = boto3.client('s3')
+s3.upload_fileobj(output_atom, 'dyn.tedder.me', 'rss/ppa/rquillo.atom', ExtraArgs={
+  'CacheControl': 'public, max-age=3600',
+  'ContentType': 'application/atom+xml',
+  'ACL': 'public-read',
+  'StorageClass': 'REDUCED_REDUNDANCY'
+})
 
 #p = HTMLParser()
 #p.feed(packages.text)
