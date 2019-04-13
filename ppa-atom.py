@@ -39,8 +39,7 @@ s3 = boto3.client('s3')
 s3.upload_fileobj(output_atom, 'dyn.tedder.me', 'rss/ppa/rquillo.atom', ExtraArgs={
   'CacheControl': 'public, max-age=3600',
   'ContentType': 'application/atom+xml',
-  'ACL': 'public-read',
-  'StorageClass': 'REDUCED_REDUNDANCY'
+  'ACL': 'public-read'
 })
 
 #p = HTMLParser()
